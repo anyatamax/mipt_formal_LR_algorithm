@@ -1,0 +1,1 @@
+add_library(Library SHARED ${PROJECT_SOURCE_DIR}/src/LR_algorithm.cpp)
