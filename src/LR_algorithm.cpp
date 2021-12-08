@@ -105,6 +105,19 @@ void Algo::Fit(Grammar &gram) {
             }
         }
     }
+//    for (int i = 0; i < LR_table_.size(); ++i) {
+//        for (auto &sym : alphabet_[0]) {
+//            std::cout << sym << ":" << LR_table_[i][sym].action << LR_table_[i][sym].start_symbol << LR_table_[i][sym].index << " ";
+//        }
+//        char sym = '$';
+//        std::cout << sym << ":" << LR_table_[i][sym].action << LR_table_[i][sym].start_symbol << LR_table_[i][sym].index << "\n";
+//    }
+//    for (int i = 0; i < go_to_.size(); ++i) {
+//        for (auto &sym : alphabet_[1]) {
+//            std::cout << sym << go_to_[i][sym] << " ";
+//        }
+//        std::cout << "\n";
+//    }
 }
 bool Algo::Predict(std::string &str_find) {
     std::string str = str_find;
@@ -124,6 +137,9 @@ bool Algo::Predict(std::string &str_find) {
             ++index;
         } else if (LR_table_[cur_state][str[index]].action == "Reduce") {
             std::string cur_rule_right = grammar_[LR_table_[cur_state][str[index]].start_symbol][LR_table_[cur_state][str[index]].index];
+            if (cur_rule_right == ".") {
+                cur_rule_right = "";
+            }
             for (int i = 0; i < cur_rule_right.size(); ++i) {
                 stack_algo.pop();
             }
@@ -156,7 +172,7 @@ void Algo::SetTable() {
 }
 int Algo::FindGrammar(const Rule &rule) {
     for (int i = 0 ; i < grammar_[rule.left_path].size(); ++i) {
-        if (grammar_[rule.left_path][i] == rule.right_path) {
+        if (grammar_[rule.left_path][i] == rule.right_path || (grammar_[rule.left_path][i] == "." && rule.right_path.empty())) {
             return i;
         }
     }
@@ -184,6 +200,9 @@ std::set<Rule> Algo::Closure(std::set<Rule> &set) {
                 for (auto &rule : grammar_[start_state]) {
                     for (auto &next : next_situation) {
                         Rule new_rule = {start_state, rule};
+                        if (rule == ".") {
+                            new_rule.right_path.clear();
+                        }
                         new_rule.dot_position = 0;
                         new_rule.next = next;
                         if (cur_set.find(new_rule) == cur_set.end()) {
@@ -213,6 +232,9 @@ std::vector<char> Algo::First(std::string beta, char alpha) {
 void Algo::FindNextLetter(char state, std::vector<char> &terminals_next) {
     // epsilon i need to do
     for (auto &rule : grammar_[state]) {
+        if (rule[0] == '.') {
+            continue;
+        }
         if (std::islower(rule[0])) {
             terminals_next.push_back(rule[0]);
         } else {
