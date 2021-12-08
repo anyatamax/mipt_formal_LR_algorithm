@@ -1,5 +1,9 @@
 #include "../include/LR_algorithm.h"
 
+const char* LRException::what() const noexcept {
+    return error_.c_str();
+}
+
 bool operator<(const Rule &lhs, const Rule &rhs) {
     if (lhs.left_path == rhs.left_path) {
         if (rhs.right_path == lhs.right_path) {
@@ -36,20 +40,32 @@ std::istream& operator>>(std::istream& in, Grammar& grammar) {
     std::string rule;
     std::getline(in, rule);
     int index = 0;
-    while (rule[index] != '-' && rule[index + 1] != '>') {
-        if (std::isalpha(rule[index])) {
-            if (std::islower(rule[index])) {
-                grammar.alphabet_[0].insert(rule[index]);
-            }
-            if (std::isupper(rule[index])) {
-                grammar.alphabet_[1].insert(rule[index]);
-            }
-        }
+    if (!isupper(rule[index])) {
+        throw LRException("Invalid input");
+    }
+    grammar.alphabet_[1].insert(rule[index]);
+    ++index;
+    if (rule[index] != ' ' && rule[index] != '-') {
+        throw LRException("Invalid input");
+    }
+    while (index < rule.size() && rule[index] == ' ') {
         ++index;
     }
+    if (index >= rule.size() - 1) {
+        throw LRException("Invalid input");
+    }
+    if (rule[index] != '-' || rule[index + 1] != '>') {
+        throw LRException("Invalid input");
+    }
     index += 2;
-    while (rule[index] == ' ') {
+    if (index > rule.size() - 1) {
+        throw LRException("Invalid input");
+    }
+    while (index < rule.size() && rule[index] == ' ') {
         ++index;
+    }
+    if (index == rule.size()) {
+        throw LRException("Invalid input");
     }
     grammar.InsertGrammar(rule[0], rule.substr(index, rule.size()));
     for (int i = index; i < rule.size(); ++i) {
@@ -60,6 +76,10 @@ std::istream& operator>>(std::istream& in, Grammar& grammar) {
             if (std::isupper(rule[i])) {
                 grammar.alphabet_[1].insert(rule[i]);
             }
+        } else if (rule[i] != '$') {
+            grammar.alphabet_[0].insert(rule[i]);
+        } else {
+            throw LRException("Invalid input");
         }
     }
     return in;
@@ -76,7 +96,7 @@ void Algo::Fit(Grammar &gram) {
                 LR_table_[i]['$'] = {"Accept"};
             } else {
                 char symbol = rule.right_path[rule.dot_position];
-                if (std::islower(symbol)) {
+                if (!std::isupper(symbol)) {
                     std::set<Rule> move_to = GoTo(grammar_states_[i], symbol);
                     int index = -1;
                     for (int j = 0; j < grammar_states_.size(); ++j) {
@@ -87,6 +107,8 @@ void Algo::Fit(Grammar &gram) {
                     }
                     if (index != -1) {
                         LR_table_[i][symbol] = {"Shift", index};
+                    } else {
+                        throw LRException("Not LR-Grammar");
                     }
                 }
                 if (std::isupper(symbol)) {
@@ -100,6 +122,8 @@ void Algo::Fit(Grammar &gram) {
                     }
                     if (index != -1) {
                         go_to_[i][symbol] = index;
+                    } else {
+                        throw LRException("Not LR-Grammar");
                     }
                 }
             }
@@ -119,7 +143,15 @@ void Algo::Fit(Grammar &gram) {
 //        std::cout << "\n";
 //    }
 }
-bool Algo::Predict(std::string &str_find) {
+void Algo::Predict(std::string &str_find) {
+    if (Algorithm(str_find)) {
+        std::cout << "YES\n";
+    } else {
+        std::cout << "NO\n";
+    }
+}
+
+bool Algo::Algorithm(std::string &str_find) {
     std::string str = str_find;
     str += '$';
     int index = 0;
@@ -230,15 +262,14 @@ std::vector<char> Algo::First(std::string beta, char alpha) {
     return first_terminals;
 }
 void Algo::FindNextLetter(char state, std::vector<char> &terminals_next) {
-    // epsilon i need to do
     for (auto &rule : grammar_[state]) {
         if (rule[0] == '.') {
             continue;
         }
-        if (std::islower(rule[0])) {
-            terminals_next.push_back(rule[0]);
-        } else {
+        if (std::isupper(rule[0])) {
             FindNextLetter(rule[0], terminals_next);
+        } else {
+            terminals_next.push_back(rule[0]);
         }
     }
 }

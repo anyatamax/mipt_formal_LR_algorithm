@@ -8,6 +8,15 @@
 #include <stack>
 #include <utility>
 
+class LRException : public  std::exception {
+public:
+    LRException(std::string err) : error_(err) {};
+    const char* what() const noexcept override;
+
+private:
+    std::string error_;
+};
+
 struct TableStatus {
     std::string action;
     int index;
@@ -41,7 +50,7 @@ private:
 class Algo {
 public:
     void Fit(Grammar &gram);
-    bool Predict(std::string &str_find);
+    void Predict(std::string &str_find);
 
 private:
     std::vector<std::map<char, TableStatus>> LR_table_;
@@ -56,4 +65,5 @@ private:
     void FindNextLetter(char state, std::vector<char> &terminals_next);
     std::set<Rule> GoTo(std::set<Rule> &set, char symbol);
     void BuildGrammarSets(Grammar &gram);
+    bool Algorithm(std::string &str_find);
 };
