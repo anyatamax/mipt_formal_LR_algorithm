@@ -29,9 +29,3 @@ target_link_libraries(mipt_formal_LR_algorithm Library)
 target_include_directories(mipt_formal_LR_algorithm PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/Test)
-
-#setup_target_for_coverage(tests ${PROJECT_SOURCE_DIR}/bin/Test coverage)
-#
-#
-#enable_testing()
-#add_test(Test0 ${PROJECT_SOURCE_DIR}/bin/Test)

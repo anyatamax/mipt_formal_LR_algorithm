@@ -24,16 +24,27 @@ bool operator==(const Rule &lhs, const Rule &rhs) {
             lhs.dot_position == rhs.dot_position);
 }
 
+bool operator==(const TableStatus &lhs, const TableStatus &rhs) {
+    return (lhs.action == rhs.action &&
+            lhs.index == rhs.index &&
+            lhs.start_symbol == rhs.start_symbol);
+}
+
 void Grammar::InsertGrammar(char left_rule, std::string &&right_rule) {
     grammar_[left_rule].push_back(right_rule);
 }
 
-std::vector<std::set<char>> Grammar::GetAlphabet() const {
-    return alphabet_;
+std::vector<std::set<char>>&& Grammar::GetAlphabet() {
+    return std::move(alphabet_);
 }
 
-std::map<char, std::vector<std::string>> Grammar::GetGrammar() const {
-    return grammar_;
+std::map<char, std::vector<std::string>>&& Grammar::GetGrammar() {
+    return std::move(grammar_);
+}
+
+void Grammar::SetGrammar(std::map<char, std::vector<std::string>> &gram, std::vector<std::set<char>> &alph) {
+    grammar_ = gram;
+    alphabet_ = alph;
 }
 
 std::istream& operator>>(std::istream& in, Grammar& grammar) {
@@ -107,8 +118,6 @@ void Algo::Fit(Grammar &gram) {
                     }
                     if (index != -1) {
                         LR_table_[i][symbol] = {"Shift", index};
-                    } else {
-                        throw LRException("Not LR-Grammar");
                     }
                 }
                 if (std::isupper(symbol)) {
@@ -122,8 +131,6 @@ void Algo::Fit(Grammar &gram) {
                     }
                     if (index != -1) {
                         go_to_[i][symbol] = index;
-                    } else {
-                        throw LRException("Not LR-Grammar");
                     }
                 }
             }
