@@ -2,7 +2,6 @@
 #include <string>
 #include "LR_algorithm.h"
 
-//Прописать исключения, подключить тесты
 int main() {
     Grammar gram;
     int n;

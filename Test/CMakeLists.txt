@@ -1,3 +1,4 @@
+include_directories(${PROJECT_SOURCE_DIR}/include)
 add_executable(Test main_test.cpp test_LR_algorithm.cpp test_LR_algorithm.h)
 target_link_libraries(Test ${GTEST_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} gcov Threads::Threads Library)
 

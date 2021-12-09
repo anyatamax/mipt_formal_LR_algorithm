@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../include/LR_algorithm.h"
+#include "LR_algorithm.h"
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
