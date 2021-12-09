@@ -1,4 +1,4 @@
-#include "../include/LR_algorithm.h"
+#include "LR_algorithm.h"
 
 const char* LRException::what() const noexcept {
     return error_.c_str();
