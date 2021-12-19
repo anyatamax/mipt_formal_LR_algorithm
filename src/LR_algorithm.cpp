@@ -51,7 +51,7 @@ std::istream& operator>>(std::istream& in, Grammar& grammar) {
     std::string rule;
     std::getline(in, rule);
     int index = 0;
-    if (!isupper(rule[index])) {
+    if (!Algo::IsNonTerminal(rule[index])) {
         throw LRException("Invalid input");
     }
     grammar.alphabet_[1].insert(rule[index]);
@@ -81,10 +81,10 @@ std::istream& operator>>(std::istream& in, Grammar& grammar) {
     grammar.InsertGrammar(rule[0], rule.substr(index, rule.size()));
     for (int i = index; i < rule.size(); ++i) {
         if (std::isalpha(rule[i])) {
-            if (std::islower(rule[i])) {
+            if (Algo::IsTerminal(rule[i])) {
                 grammar.alphabet_[0].insert(rule[i]);
             }
-            if (std::isupper(rule[i])) {
+            if (Algo::IsNonTerminal(rule[i])) {
                 grammar.alphabet_[1].insert(rule[i]);
             }
         } else if (rule[i] != '$') {
@@ -104,10 +104,10 @@ void Algo::Fit(Grammar &gram) {
             if (rule.dot_position == rule.right_path.size() && rule.left_path != '!') {
                 LR_table_[i][rule.next] = {"Reduce", FindGrammar(rule), rule.left_path};
             } else if (rule.dot_position == rule.right_path.size() && rule.left_path == '!') {
-                LR_table_[i]['$'] = {"Accept"};
+                LR_table_[i][EOW] = {"Accept"};
             } else {
                 char symbol = rule.right_path[rule.dot_position];
-                if (!std::isupper(symbol)) {
+                if (!IsNonTerminal(symbol)) {
                     std::set<Rule> move_to = GoTo(grammar_states_[i], symbol);
                     int index = -1;
                     for (int j = 0; j < grammar_states_.size(); ++j) {
@@ -120,7 +120,7 @@ void Algo::Fit(Grammar &gram) {
                         LR_table_[i][symbol] = {"Shift", index};
                     }
                 }
-                if (std::isupper(symbol)) {
+                if (IsNonTerminal(symbol)) {
                     std::set<Rule> move_to = GoTo(grammar_states_[i], symbol);
                     int index = -1;
                     for (int j = 0; j < grammar_states_.size(); ++j) {
@@ -136,38 +136,25 @@ void Algo::Fit(Grammar &gram) {
             }
         }
     }
-//    for (int i = 0; i < LR_table_.size(); ++i) {
-//        for (auto &sym : alphabet_[0]) {
-//            std::cout << sym << ":" << LR_table_[i][sym].action << LR_table_[i][sym].start_symbol << LR_table_[i][sym].index << " ";
-//        }
-//        char sym = '$';
-//        std::cout << sym << ":" << LR_table_[i][sym].action << LR_table_[i][sym].start_symbol << LR_table_[i][sym].index << "\n";
-//    }
-//    for (int i = 0; i < go_to_.size(); ++i) {
-//        for (auto &sym : alphabet_[1]) {
-//            std::cout << sym << go_to_[i][sym] << " ";
-//        }
-//        std::cout << "\n";
-//    }
 }
-void Algo::Predict(std::string &str_find) {
-    if (Algorithm(str_find)) {
+void Algo::PredictWrapper(std::string &str_find) {
+    if (Predict(str_find)) {
         std::cout << "YES\n";
     } else {
         std::cout << "NO\n";
     }
 }
 
-bool Algo::Algorithm(std::string &str_find) {
+bool Algo::Predict(std::string &str_find) {
     std::string str = str_find;
-    str += '$';
+    str += EOW;
     int index = 0;
     std::stack<int> stack_algo;
     stack_algo.push(0);
     while (index < str.size()) {
         int cur_state = stack_algo.top();
         if (alphabet_[0].find(str[index]) == alphabet_[0].end()) {
-            if (str[index] != '$') {
+            if (str[index] != EOW) {
                 return false;
             }
         }
@@ -203,7 +190,7 @@ void Algo::SetTable() {
         for (auto &symbol : alphabet_[0]) {
             LR_table_[i][symbol] = {"Error"};
         }
-        LR_table_[i]['$'] = {"Error"};
+        LR_table_[i][EOW] = {"Error"};
         for (auto &symbol : alphabet_[1]) {
             go_to_[i][symbol] = -1;
         }
@@ -228,7 +215,7 @@ std::set<Rule> Algo::Closure(std::set<Rule> &set) {
                 continue;
             }
             char start_state = situation.right_path[pos];
-            if (std::isupper(start_state)) {
+            if (IsNonTerminal(start_state)) {
                 std::vector<char> next_situation;
                 std::string beta;
                 char alpha = situation.next;
@@ -261,7 +248,7 @@ std::vector<char> Algo::First(std::string beta, char alpha) {
         first_terminals.push_back(alpha);
         return first_terminals;
     }
-    if (std::isupper(beta[0])) {
+    if (IsNonTerminal(beta[0])) {
         FindNextLetter(beta[0], first_terminals);
         return first_terminals;
     }
@@ -273,7 +260,7 @@ void Algo::FindNextLetter(char state, std::vector<char> &terminals_next) {
         if (rule[0] == '.') {
             continue;
         }
-        if (std::isupper(rule[0])) {
+        if (IsNonTerminal(rule[0])) {
             FindNextLetter(rule[0], terminals_next);
         } else {
             terminals_next.push_back(rule[0]);
@@ -297,7 +284,7 @@ void Algo::BuildGrammarSets(Grammar &gram) {
     grammar_ = gram.GetGrammar();
     alphabet_ = gram.GetAlphabet();
     std::set<Rule> start_rule;
-    start_rule.insert(Rule{'!', "S", '$', 0});
+    start_rule.insert(Rule{'!', "S", EOW, 0});
     grammar_states_.push_back(Closure(start_rule));
     bool changed;
     do {
@@ -321,4 +308,28 @@ void Algo::BuildGrammarSets(Grammar &gram) {
             grammar_states_.push_back(new_states);
         }
     } while (changed);
+}
+
+bool Algo::IsNonTerminal(char letter) {
+    return std::isupper(letter);
+}
+
+bool Algo::IsTerminal(char letter) {
+    return std::islower(letter);
+}
+
+void Algo::PrintLRTable() {
+    for (int i = 0; i < LR_table_.size(); ++i) {
+        for (auto &sym : alphabet_[0]) {
+            std::cout << sym << ":" << LR_table_[i][sym].action << LR_table_[i][sym].start_symbol << LR_table_[i][sym].index << " ";
+        }
+        char sym = '$';
+        std::cout << sym << ":" << LR_table_[i][sym].action << LR_table_[i][sym].start_symbol << LR_table_[i][sym].index << "\n";
+    }
+    for (int i = 0; i < go_to_.size(); ++i) {
+        for (auto &sym : alphabet_[1]) {
+            std::cout << sym << go_to_[i][sym] << " ";
+        }
+        std::cout << "\n";
+    }
 }

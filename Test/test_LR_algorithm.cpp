@@ -4,15 +4,15 @@
 TEST_F(TestAlgorithm, GrammarTest) {
     Grammar gram_construct;
     EXPECT_EQ(gram_construct.GetAlphabet().size(), 2);
-    Grammar gram;
+    Grammar grammar;
     char left_first = 'S';
     char left_second = 'C';
     std::string right_first = "CC";
     std::string right_second = "dd";
-    gram.InsertGrammar(left_first, std::move(right_first));
-    gram.InsertGrammar(left_second, std::move(right_second));
-    std::map<char, std::vector<std::string>> gram_cur = gram.GetGrammar();
-    std::vector<std::set<char>> alphabet_cur = gram.GetAlphabet();
+    grammar.InsertGrammar(left_first, std::move(right_first));
+    grammar.InsertGrammar(left_second, std::move(right_second));
+    std::map<char, std::vector<std::string>> gram_cur = grammar.GetGrammar();
+    std::vector<std::set<char>> alphabet_cur = grammar.GetAlphabet();
     EXPECT_EQ(gram_cur['S'].size(), 1);
     EXPECT_EQ(gram_cur['C'].size(), 1);
     EXPECT_EQ(gram_cur['S'][0], "CC");
@@ -22,17 +22,17 @@ TEST_F(TestAlgorithm, GrammarTest) {
 }
 
 TEST_F(TestAlgorithm, First) {
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("CC");
-    gram['C'].push_back("cC");
-    gram['C'].push_back("d");
-    std::vector<std::set<char>> alph(2);
-    alph[0].insert('c');
-    alph[0].insert('d');
-    alph[1].insert('S');
-    alph[1].insert('C');
-    moc_algo.SetAlphabet(alph);
-    moc_algo.SetGrammar(gram);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("CC");
+    grammar['C'].push_back("cC");
+    grammar['C'].push_back("d");
+    std::vector<std::set<char>> alphabet(2);
+    alphabet[0].insert('c');
+    alphabet[0].insert('d');
+    alphabet[1].insert('S');
+    alphabet[1].insert('C');
+    moc_algo.SetAlphabet(alphabet);
+    moc_algo.SetGrammar(grammar);
     std::vector<char> next;
     next.push_back('$');
     std::vector<char> next_cur = moc_algo.TestFirst("", '$');
@@ -49,17 +49,17 @@ TEST_F(TestAlgorithm, First) {
 }
 
 TEST_F(TestAlgorithm, Closure) {
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("CC");
-    gram['C'].push_back("cC");
-    gram['C'].push_back("d");
-    std::vector<std::set<char>> alph(2);
-    alph[0].insert('c');
-    alph[0].insert('d');
-    alph[1].insert('S');
-    alph[1].insert('C');
-    moc_algo.SetAlphabet(alph);
-    moc_algo.SetGrammar(gram);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("CC");
+    grammar['C'].push_back("cC");
+    grammar['C'].push_back("d");
+    std::vector<std::set<char>> alphabet(2);
+    alphabet[0].insert('c');
+    alphabet[0].insert('d');
+    alphabet[1].insert('S');
+    alphabet[1].insert('C');
+    moc_algo.SetAlphabet(alphabet);
+    moc_algo.SetGrammar(grammar);
     std::set<Rule> start_rule;
     start_rule.insert(Rule{'!', "S", '$', 0});
     std::set<Rule> state = moc_algo.TestClosure(start_rule);
@@ -73,21 +73,21 @@ TEST_F(TestAlgorithm, Closure) {
 }
 
 TEST_F(TestAlgorithm, GoTo) {
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("CC");
-    gram['C'].push_back("cC");
-    gram['C'].push_back("d");
-    std::vector<std::set<char>> alph(2);
-    alph[0].insert('c');
-    alph[0].insert('d');
-    alph[1].insert('S');
-    alph[1].insert('C');
-    moc_algo.SetAlphabet(alph);
-    moc_algo.SetGrammar(gram);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("CC");
+    grammar['C'].push_back("cC");
+    grammar['C'].push_back("d");
+    std::vector<std::set<char>> alphabet(2);
+    alphabet[0].insert('c');
+    alphabet[0].insert('d');
+    alphabet[1].insert('S');
+    alphabet[1].insert('C');
+    moc_algo.SetAlphabet(alphabet);
+    moc_algo.SetGrammar(grammar);
     std::set<Rule> state;
     state.insert({'!', "S", '$', 1});
     for (int i = 0; i < 2; ++i) {
-        for (auto &symbol : alph[i]) {
+        for (auto &symbol : alphabet[i]) {
             std::set<Rule> state_cur = moc_algo.TestGoTo(state, symbol);
             EXPECT_TRUE(state_cur.empty());
         }
@@ -102,38 +102,38 @@ TEST_F(TestAlgorithm, GoTo) {
 }
 
 TEST_F(TestAlgorithm, BuildGrammarStates) {
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("Cc");
-    gram['C'].push_back("d");
-    std::vector<std::set<char>> alph(2);
-    alph[0].insert('c');
-    alph[0].insert('d');
-    alph[1].insert('S');
-    alph[1].insert('C');
-    moc_algo.SetAlphabet(alph);
-    moc_algo.SetGrammar(gram);
-    std::vector<std::set<Rule>> gram_states(5);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("Cc");
+    grammar['C'].push_back("d");
+    std::vector<std::set<char>> alphabet(2);
+    alphabet[0].insert('c');
+    alphabet[0].insert('d');
+    alphabet[1].insert('S');
+    alphabet[1].insert('C');
+    moc_algo.SetAlphabet(alphabet);
+    moc_algo.SetGrammar(grammar);
+    std::vector<std::set<Rule>> grammar_states(5);
     std::set<Rule> cur_rule;
     cur_rule.insert({'!', "S", '$', 0});
     cur_rule.insert({'S', "Cc", '$', 0});
     cur_rule.insert({'C', "d", 'c', 0});
-    gram_states[0] = cur_rule;
+    grammar_states[0] = cur_rule;
     cur_rule.clear();
     cur_rule.insert({'!', "S", '$', 1});
-    gram_states[3] = cur_rule;
+    grammar_states[3] = cur_rule;
     cur_rule.clear();
     cur_rule.insert({'C', "d", 'c', 1});
-    gram_states[1] = cur_rule;
+    grammar_states[1] = cur_rule;
     cur_rule.clear();
     cur_rule.insert({'S', "Cc", '$', 1});
-    gram_states[2] = cur_rule;
+    grammar_states[2] = cur_rule;
     cur_rule.clear();
     cur_rule.insert({'S', "Cc", '$', 2});
-    gram_states[4] = cur_rule;
+    grammar_states[4] = cur_rule;
     cur_rule.clear();
     Grammar moc_gram;
-    moc_gram.SetGrammar(gram, alph);
-    EXPECT_EQ(moc_algo.TestGrammarStates(moc_gram), gram_states);
+    moc_gram.SetGrammar(grammar, alphabet);
+    EXPECT_EQ(moc_algo.TestGrammarStates(moc_gram), grammar_states);
 }
 
 TEST_F(TestAlgorithm, TestFitFirst) {
@@ -142,12 +142,12 @@ TEST_F(TestAlgorithm, TestFitFirst) {
     alph[0].insert('d');
     alph[1].insert('S');
     alph[1].insert('C');
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("CC");
-    gram['C'].push_back("cC");
-    gram['C'].push_back("d");
-    Grammar grammar;
-    grammar.SetGrammar(gram, alph);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("CC");
+    grammar['C'].push_back("cC");
+    grammar['C'].push_back("d");
+    Grammar grammar_result;
+    grammar_result.SetGrammar(grammar, alph);
     std::vector<std::map<char, TableStatus>> result_table(10);
     for (int i = 0; i < result_table.size(); ++i) {
         for (auto &symbol : alph[0]) {
@@ -182,7 +182,7 @@ TEST_F(TestAlgorithm, TestFitFirst) {
     go_to[1]['C'] = 5;
     go_to[3]['C'] = 8;
     go_to[6]['C'] = 9;
-    EXPECT_EQ(moc_algo.TestFit(grammar), result_table);
+    EXPECT_EQ(moc_algo.TestFit(grammar_result), result_table);
     EXPECT_EQ(moc_algo.GetGoTo(), go_to);
 }
 
@@ -192,11 +192,11 @@ TEST_F(TestAlgorithm, TestFitSecond) {
     alph[0].insert('b');
     alph[0].insert('.');
     alph[1].insert('S');
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("SaSb");
-    gram['S'].push_back(".");
-    Grammar grammar;
-    grammar.SetGrammar(gram, alph);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("SaSb");
+    grammar['S'].push_back(".");
+    Grammar grammar_result;
+    grammar_result.SetGrammar(grammar, alph);
     std::vector<std::map<char, TableStatus>> result_table(8);
     for (int i = 0; i < result_table.size(); ++i) {
         for (auto &symbol : alph[0]) {
@@ -229,7 +229,7 @@ TEST_F(TestAlgorithm, TestFitSecond) {
     go_to[0]['S'] = 1;
     go_to[2]['S'] = 3;
     go_to[4]['S'] = 6;
-    EXPECT_EQ(moc_algo.TestFit(grammar), result_table);
+    EXPECT_EQ(moc_algo.TestFit(grammar_result), result_table);
     EXPECT_EQ(moc_algo.GetGoTo(), go_to);
 }
 
@@ -239,10 +239,10 @@ TEST_F(TestAlgorithm, TestFindGrammar) {
     alph[0].insert('b');
     alph[0].insert('.');
     alph[1].insert('S');
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("SaSb");
-    gram['S'].push_back(".");
-    moc_algo.SetGrammar(gram);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("SaSb");
+    grammar['S'].push_back(".");
+    moc_algo.SetGrammar(grammar);
     moc_algo.SetAlphabet(alph);
     Rule rule = {'S', "Sa", '$', 0};
     EXPECT_EQ(moc_algo.TestFindGrammar(rule), -1);
@@ -254,12 +254,12 @@ TEST_F(TestAlgorithm, TestAlgorithmFirst) {
     alph[0].insert('b');
     alph[0].insert('.');
     alph[1].insert('S');
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("SaSb");
-    gram['S'].push_back(".");
-    Grammar grammar;
-    grammar.SetGrammar(gram, alph);
-    moc_algo.Fit(grammar);
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("SaSb");
+    grammar['S'].push_back(".");
+    Grammar grammar_result;
+    grammar_result.SetGrammar(grammar, alph);
+    moc_algo.Fit(grammar_result);
     EXPECT_TRUE(moc_algo.TestAlgorithm("ab"));
     EXPECT_TRUE(moc_algo.TestAlgorithm("aabbab"));
     EXPECT_TRUE(moc_algo.TestAlgorithm("aabababb"));
@@ -273,67 +273,67 @@ TEST_F(TestAlgorithm, TestAlgorithmFirst) {
 }
 
 TEST_F(TestAlgorithm, TestPredictFirst) {
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("Cc");
-    gram['C'].push_back("d");
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("Cc");
+    grammar['C'].push_back("d");
     std::vector<std::set<char>> alph(2);
     alph[0].insert('c');
     alph[0].insert('d');
     alph[1].insert('S');
     alph[1].insert('C');
-    Grammar grammar;
-    grammar.SetGrammar(gram, alph);
-    moc_algo.Fit(grammar);
+    Grammar grammar_result;
+    grammar_result.SetGrammar(grammar, alph);
+    moc_algo.Fit(grammar_result);
     std::string str_first = "dc";
     std::string str_second = "dd";
     std::ostringstream oss;
     std::streambuf* p_cout_streambuf = std::cout.rdbuf();
     std::cout.rdbuf(oss.rdbuf());
-    moc_algo.Predict(str_first);
+    moc_algo.PredictWrapper(str_first);
     std::cout.rdbuf(p_cout_streambuf);
     EXPECT_TRUE(oss && oss.str() == "YES\n");
 }
 
 TEST_F(TestAlgorithm, TestPredictSecond) {
-    std::map<char, std::vector<std::string>> gram;
-    gram['S'].push_back("Cc");
-    gram['C'].push_back("d");
+    std::map<char, std::vector<std::string>> grammar;
+    grammar['S'].push_back("Cc");
+    grammar['C'].push_back("d");
     std::vector<std::set<char>> alph(2);
     alph[0].insert('c');
     alph[0].insert('d');
     alph[1].insert('S');
     alph[1].insert('C');
-    Grammar grammar;
-    grammar.SetGrammar(gram, alph);
-    moc_algo.Fit(grammar);
+    Grammar grammar_result;
+    grammar_result.SetGrammar(grammar, alph);
+    moc_algo.Fit(grammar_result);
     std::string str_first = "dc";
     std::string str_second = "dd";
     std::ostringstream oss;
     std::streambuf* p_cout_streambuf = std::cout.rdbuf();
     std::cout.rdbuf(oss.rdbuf());
-    moc_algo.Predict(str_second);
+    moc_algo.PredictWrapper(str_second);
     std::cout.rdbuf(p_cout_streambuf);
     EXPECT_TRUE(oss && oss.str() == "NO\n");
 }
 
 TEST_F(TestAlgorithm, TestStream) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str;
     str << "S -> CC\n";
-    str >> gram;
-    std::map<char, std::vector<std::string>> gram_cur = gram.GetGrammar();
-    std::vector<std::set<char>> alph_cur = gram.GetAlphabet();
+    str >> grammar;
+    std::map<char, std::vector<std::string>> gram_cur = grammar.GetGrammar();
+    std::vector<std::set<char>> alph_cur = grammar.GetAlphabet();
     std::vector<std::set<char>> alph(2);
-    std::map<char, std::vector<std::string>> grammar;
+    std::map<char, std::vector<std::string>> grammar_second;
     alph[1].insert('S');
     alph[1].insert('C');
-    grammar['S'].push_back("CC");
-    EXPECT_EQ(gram_cur, grammar);
+    grammar_second['S'].push_back("CC");
+    EXPECT_EQ(gram_cur, grammar_second);
     EXPECT_EQ(alph_cur, alph);
     std::stringstream str_fail;
     try {
         str_fail << "c -> Cd\n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch (const LRException &expected) {
@@ -342,11 +342,11 @@ TEST_F(TestAlgorithm, TestStream) {
 }
 
 TEST_F(TestAlgorithm, TestStream1) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str_fail;
     try {
         str_fail << "Cd -> Cd\n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch (const LRException &expected) {
@@ -355,11 +355,11 @@ TEST_F(TestAlgorithm, TestStream1) {
 }
 
 TEST_F(TestAlgorithm, TestStream2) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str_fail;
     try {
         str_fail << "C\n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch (const LRException &expected) {
@@ -368,11 +368,11 @@ TEST_F(TestAlgorithm, TestStream2) {
 }
 
 TEST_F(TestAlgorithm, TestStream3) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str_fail;
     try {
         str_fail << "C --> D\n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch(const LRException& expected) {
@@ -381,11 +381,11 @@ TEST_F(TestAlgorithm, TestStream3) {
 }
 
 TEST_F(TestAlgorithm, TestStream4) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str_fail;
     try {
         str_fail << "C ->\n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch(const LRException& expected) {
@@ -394,11 +394,11 @@ TEST_F(TestAlgorithm, TestStream4) {
 }
 
 TEST_F(TestAlgorithm, TestStream5) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str_fail;
     try {
         str_fail << "C ->  \n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch(const LRException& expected) {
@@ -407,11 +407,11 @@ TEST_F(TestAlgorithm, TestStream5) {
 }
 
 TEST_F(TestAlgorithm, TestStream6) {
-    Grammar gram;
+    Grammar grammar;
     std::stringstream str_fail;
     try {
         str_fail << "C ->  D$\n";
-        str_fail >> gram;
+        str_fail >> grammar;
         FAIL();
     }
     catch(const LRException& expected) {

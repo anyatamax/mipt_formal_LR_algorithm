@@ -52,9 +52,12 @@ protected:
 class Algo {
 public:
     void Fit(Grammar &gram);
-    void Predict(std::string &str_find);
+    void PredictWrapper(std::string &str_find);
+    static bool IsTerminal(char letter);
+    static bool IsNonTerminal(char letter);
 
 protected:
+    const char EOW = '$';
     std::vector<std::map<char, TableStatus>> LR_table_;
     std::vector<std::map<char, int>> go_to_;
     std::vector<std::set<Rule>> grammar_states_;
@@ -67,5 +70,6 @@ protected:
     void FindNextLetter(char state, std::vector<char> &terminals_next);
     std::set<Rule> GoTo(std::set<Rule> &set, char symbol);
     void BuildGrammarSets(Grammar &gram);
-    bool Algorithm(std::string &str_find);
+    bool Predict(std::string &str_find);
+    void PrintLRTable();
 };

@@ -16,7 +16,7 @@ int main() {
     std::cin >> n;
     for (int i = 0; i < n; ++i) {
         std::cin >> str;
-        a.Predict(str);
+        a.PredictWrapper(str);
     }
     return 0;
 }

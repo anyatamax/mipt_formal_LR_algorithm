@@ -34,7 +34,7 @@ public:
         return go_to_;
     }
     bool TestAlgorithm(std::string str) {
-        return Algorithm(str);
+        return Predict(str);
     }
     int TestFindGrammar(const Rule &rule) {
         return FindGrammar(rule);
